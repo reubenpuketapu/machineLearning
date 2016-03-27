@@ -31,7 +31,7 @@ public class NearestNeighbour {
 		String testFilename = "iris-test.txt";
 		scanNodes(testFilename, testSet);
 
-		System.out.println("   Actual\t\t   Outcome");
+		System.out.println("\n   Actual\t\t   Outcome");
 		classNodes();
 
 	}
@@ -89,42 +89,65 @@ public class NearestNeighbour {
 	}
 
 	private void classNodes() {
-		
-		// Iterate through all of the test nodes and classify them into class instances
+
+		double accuracy = 0;
+
+		// Iterate through all of the test nodes and classify them into class
+		// instances
 		for (Node testNode : testSet) {
 
 			ArrayList<Node> nodes = new ArrayList<>();
 			nodes.addAll(trainingSet);
 
-			// Sort the test set based on the given comparator 
+			// Sort the test set based on the given comparator
 			Collections.sort(nodes, comparator(testNode));
-			
-			// Now order the top 'k' classes in order of frequency into a tree map
+
+			// Now order the top 'k' classes in order of frequency into a tree
+			// map
 			TreeMap<String, Integer> classes = new TreeMap<>();
 			for (int i = 0; i < k; i++) {
 				if (classes.containsKey(nodes.get(i).getClassName())) {
 
 					int count = classes.get(nodes.get(i).getClassName());
-					classes.replace(nodes.get(i).getClassName(), count+1);
+					classes.replace(nodes.get(i).getClassName(), count + 1);
 
 				} else {
 					classes.put(nodes.get(i).getClassName(), 1);
 				}
 			}
-			
-			// set the test outcome to the most commonly occurring class in the top 'k' instances
-			testNode.setTestOutcome(classes.firstKey());
+
+			// Iterate through the tree finding the most common class
+			int highest = 0;
+			String name = null;
+
+			for (Map.Entry<String, Integer> entry : classes.entrySet()) {
+				if (entry.getValue() > highest) {
+					highest = entry.getValue();
+					name = entry.getKey();
+				}
+			}
+
+			// set the test outcome to the most commonly occurring class in the
+			// top 'k' instances
+			testNode.setTestOutcome(name);
 
 			if (!testNode.getClassName().equalsIgnoreCase(testNode.getTestOutcome())) {
-				System.out.println( testNode.getClassName() + "\t\t" + testNode.getTestOutcome());
+				accuracy++;
+				System.out.println(testNode.getClassName() + "\t\t" + testNode.getTestOutcome());
 
 			}
 		}
+
+		System.out.printf("\nAccuracy: %.2f", (testSet.size() - accuracy) / testSet.size() * 100);
+		System.out.println("%");
+		System.out.println((int) accuracy + " out of " + testSet.size() + " classes were incorrectly assumed");
+
 	}
 
 	private Comparator<Node> comparator(Node testNode) {
-		
-		// create a new comparator based on the distance vector algorithm from two nodes to the given test node
+
+		// create a new comparator based on the distance vector algorithm from
+		// two nodes to the given test node
 		return new Comparator<Node>() {
 			@Override
 			public int compare(Node o1, Node o2) {

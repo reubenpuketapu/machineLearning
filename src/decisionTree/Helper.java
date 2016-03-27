@@ -13,7 +13,7 @@ public class Helper {
 	List<String> attNames;
 	List<Instance> allInstances;
 
-	private void readDataFile(String fname) {
+	public void readDataFile(String fname) {
 		/*
 		 * format of names file: names of categories, separated by spaces names
 		 * of attributes category followed by true's and false's for each
@@ -45,7 +45,6 @@ public class Helper {
 	private List<Instance> readInstances(Scanner din) {
 		/* instance = classname and space separated attribute values */
 		List<Instance> instances = new ArrayList<Instance>();
-		String ln;
 		while (din.hasNext()) {
 			Scanner line = new Scanner(din.nextLine());
 			instances.add(new Instance(categoryNames.indexOf(line.next()), line));
