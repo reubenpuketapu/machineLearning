@@ -11,7 +11,7 @@ public class NearestNeighbour {
 
 	private static int k;
 
-	public NearestNeighbour(String testName, String trainingName) {
+	public NearestNeighbour(String trainingName, String testName) {
 		trainingSet = new HashSet<>();
 		testSet = new HashSet<>();
 		ranges = new ArrayList<Double>();
@@ -22,16 +22,12 @@ public class NearestNeighbour {
 	private void runAlgorithm(String testName, String trainingName) {
 
 		scanK();
-
 		scanNodes(trainingName, trainingSet);
-
 		findRangeValues(trainingSet);
-
 		scanNodes(testName, testSet);
 
 		System.out.println("\nIncorrect values: ");
 		System.out.println("--------------");
-
 		System.out.println("   Actual\t\t   Outcome");
 		classNodes();
 
@@ -95,7 +91,6 @@ public class NearestNeighbour {
 
 		// Iterate through all of the test nodes and classify them into class
 		// instances
-		
 
 		for (Node testNode : testSet) {
 
@@ -133,15 +128,17 @@ public class NearestNeighbour {
 			// set the test outcome to the most commonly occurring class in the
 			// top 'k' instances
 			testNode.setTestOutcome(name);
-			
-			
+
 			if (!testNode.getClassName().equalsIgnoreCase(testNode.getTestOutcome())) {
 				accuracy++;
+				System.out.println(testNode.getClassName() + "\t\t" + testNode.getTestOutcome() + " *");
+			} else {
 				System.out.println(testNode.getClassName() + "\t\t" + testNode.getTestOutcome());
 
 			}
+
 		}
-		
+
 		System.out.println("--------------");
 
 		System.out.printf("\nAccuracy: %.2f", (testSet.size() - accuracy) / testSet.size() * 100);
@@ -220,7 +217,9 @@ public class NearestNeighbour {
 	}
 
 	public static void main(String[] args) {
-		new NearestNeighbour(args[1], args[0]);
+		// args[0] - training
+		// args[1] - test
+		new NearestNeighbour(args[0], args[1]);
 	}
 
 }

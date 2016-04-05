@@ -10,23 +10,47 @@ public class DecisionTreeLearning {
 	private Helper helper;
 	private final Node root;
 
-	public DecisionTreeLearning() {
+	private double correct = 0;
+	private double incorrect = 0;
+
+	private double firstClass = 0;
+	private double baseline = 0;
+
+	public DecisionTreeLearning(String training, String test) {
 
 		helper = new Helper();
-		helper.readDataFile("hepatitis-training.dat");
-
+		helper.readDataFile(training);
+		calculateBaseline();
 		root = buildTree(helper.allInstances, helper.attNames);
 
-		//testInstances((NonLeafNode) root);
+		printTree(root);
 
-		 printTree(root);
+		System.out.println("\n");
+		testInstances((NonLeafNode) root, test);
+
+		System.out.printf("\n\nAccuracy: %4.2f", (correct / (correct + incorrect)));
+		System.out.println("%");
+		System.out.printf("Baseline classifier: %4.2f", baseline);
+		System.out.println("%");
+
 
 	}
 
-	private void testInstances(NonLeafNode node) {
+	private void calculateBaseline() {
+
+		for (Instance instance : helper.allInstances) {
+			if (instance.getCategory() == 0) {
+				firstClass++;
+			}
+		}
+		this.baseline = firstClass / helper.allInstances.size();
+
+	}
+
+	private void testInstances(NonLeafNode node, String test) {
 
 		Helper tester = new Helper();
-		tester.readDataFile("hepatitis-test.dat");
+		tester.readDataFile(test);
 
 		for (Instance instance : tester.allInstances) {
 
@@ -38,28 +62,52 @@ public class DecisionTreeLearning {
 
 	private void classInstance(Instance instance, Node node) {
 
-		System.out.println(helper.attNames.indexOf(((NonLeafNode) node).getAttribute()));
-		System.out.println("****");
-		System.out.println(((NonLeafNode) node).getAttribute());
-		System.out.println("Class: " + node.getClass());
+		String nodeAttribute = ((NonLeafNode) node).getAttribute();
 
-		if (instance.getAtt(helper.attNames.indexOf(((NonLeafNode) node).getAttribute()))) {
+		boolean branch = instance.getAtt(helper.attNames.indexOf(nodeAttribute));
+
+		if (branch) {
 
 			if (((NonLeafNode) node).getLeft() instanceof NonLeafNode) {
-				classInstance(instance, ((NonLeafNode) node).getLeft());
-			} else {
-				System.out.println("Tested: " + ((LeafNode) node).getClassName() + " Actual: "
-						+ helper.categoryNames.get(instance.getCategory()));
-			}
-		}
 
-		else {
+				classInstance(instance, ((NonLeafNode) node).getLeft());
+
+			} else {
+
+				String calculated = ((LeafNode) ((NonLeafNode) node).getLeft()).getClassName();
+				String actual = helper.categoryNames.get(instance.getCategory());
+
+				System.out.print("Calc: " + calculated + "\t Actual: " + actual);
+
+				if (calculated.equals(actual)) {
+					correct++;
+					System.out.println();
+				} else {
+					System.out.println(" *");
+					incorrect++;
+				}
+			}
+
+		} else {
 
 			if (((NonLeafNode) node).getRight() instanceof NonLeafNode) {
+
 				classInstance(instance, ((NonLeafNode) node).getRight());
+
 			} else {
-				System.out.println("Tested: " + (((LeafNode)((NonLeafNode) node).getRight())).getClassName() + " Actual: "
-						+ helper.categoryNames.get(instance.getCategory()));
+
+				String calculated = ((LeafNode) ((NonLeafNode) node).getRight()).getClassName();
+				String actual = helper.categoryNames.get(instance.getCategory());
+
+				System.out.print("Calc: " + calculated + "\t Actual: " + actual + "");
+
+				if (calculated.equals(actual)) {
+					correct++;
+					System.out.println();
+				} else {
+					System.out.println(" *");
+					incorrect++;
+				}
 			}
 
 		}
@@ -67,15 +115,13 @@ public class DecisionTreeLearning {
 	}
 
 	private void printTree(Node node) {
-
 		node.report("");
-
 	}
 
 	public Node buildTree(List<Instance> instances, List<String> attributes) {
 
 		if (instances.isEmpty()) {
-			System.out.println("Instances empty");
+			// System.out.println("Instances empty");
 
 			double count1 = 0;
 			double count2 = 0;
@@ -99,12 +145,10 @@ public class DecisionTreeLearning {
 		}
 
 		if (calcPurity(instances) == 0) {
-			System.out.println("Purity 1");
 			return new LeafNode(helper.categoryNames.get(((Instance) instances.toArray()[0]).getCategory()), 1);
 		}
 
 		if (attributes.isEmpty()) {
-			System.out.println("Attributes empty");
 			double count1 = 0;
 			double count2 = 0;
 
@@ -127,14 +171,14 @@ public class DecisionTreeLearning {
 		}
 
 		else { // find best attribute
-			System.out.println("Else");
-			double bestImpurity = Double.MIN_VALUE;
+
+			double bestImpurity = Double.MAX_VALUE;
 
 			String bestAttribute = "";
 			List<Instance> bestTrueInstances = new ArrayList<>();
 			List<Instance> bestFalseInstances = new ArrayList<>();
 
-			for (int index = 0; index < attributes.size(); index++) {
+			for (int index = 0; index < helper.attNames.size(); index++) {
 
 				List<Instance> trueInstances = new ArrayList<>();
 				List<Instance> falseInstances = new ArrayList<>();
@@ -150,9 +194,9 @@ public class DecisionTreeLearning {
 				double weightedImpurity = calcWeightedImpurity(calcPurity(trueInstances), calcPurity(falseInstances),
 						trueInstances.size(), falseInstances.size(), trueInstances.size() + falseInstances.size());
 
-				if (bestImpurity < weightedImpurity) {
+				if (bestImpurity > weightedImpurity) {
 					bestImpurity = weightedImpurity;
-					bestAttribute = attributes.get(index);
+					bestAttribute = helper.attNames.get(index);
 					bestTrueInstances = trueInstances;
 					bestFalseInstances = falseInstances;
 
@@ -162,7 +206,6 @@ public class DecisionTreeLearning {
 			List<String> newAttributesList = new ArrayList<String>();
 			newAttributesList.addAll(attributes);
 			newAttributesList.remove(bestAttribute);
-			attributes.remove(bestAttribute);
 
 			Node left = buildTree(bestTrueInstances, newAttributesList);
 			Node right = buildTree(bestFalseInstances, newAttributesList);
@@ -201,7 +244,9 @@ public class DecisionTreeLearning {
 	}
 
 	public static void main(String[] args) {
-		new DecisionTreeLearning();
+		// args[0] - training
+		// args[1] - test
+		new DecisionTreeLearning(args[0], args[1]);
 	}
 
 }

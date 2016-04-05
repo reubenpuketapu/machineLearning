@@ -50,7 +50,7 @@ public class Helper {
 			Scanner line = new Scanner(din.nextLine());
 			instances.add(new Instance(categoryNames.indexOf(line.next()), line));
 		}
-		System.out.println("Read " + instances.size() + " instances");
+		System.out.println("Read " + instances.size() + " instances\n");
 		return instances;
 	}
 
