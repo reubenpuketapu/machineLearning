@@ -11,27 +11,28 @@ public class NearestNeighbour {
 
 	private static int k;
 
-	public NearestNeighbour() {
+	public NearestNeighbour(String testName, String trainingName) {
 		trainingSet = new HashSet<>();
 		testSet = new HashSet<>();
 		ranges = new ArrayList<Double>();
 
-		runAlgorithm();
+		runAlgorithm(testName, trainingName);
 	}
 
-	private void runAlgorithm() {
+	private void runAlgorithm(String testName, String trainingName) {
 
 		scanK();
 
-		String trainingFilename = "iris-training.txt";
-		scanNodes(trainingFilename, trainingSet);
+		scanNodes(trainingName, trainingSet);
 
 		findRangeValues(trainingSet);
 
-		String testFilename = "iris-test.txt";
-		scanNodes(testFilename, testSet);
+		scanNodes(testName, testSet);
 
-		System.out.println("\n   Actual\t\t   Outcome");
+		System.out.println("\nIncorrect values: ");
+		System.out.println("--------------");
+
+		System.out.println("   Actual\t\t   Outcome");
 		classNodes();
 
 	}
@@ -94,6 +95,8 @@ public class NearestNeighbour {
 
 		// Iterate through all of the test nodes and classify them into class
 		// instances
+		
+
 		for (Node testNode : testSet) {
 
 			ArrayList<Node> nodes = new ArrayList<>();
@@ -130,13 +133,16 @@ public class NearestNeighbour {
 			// set the test outcome to the most commonly occurring class in the
 			// top 'k' instances
 			testNode.setTestOutcome(name);
-
+			
+			
 			if (!testNode.getClassName().equalsIgnoreCase(testNode.getTestOutcome())) {
 				accuracy++;
 				System.out.println(testNode.getClassName() + "\t\t" + testNode.getTestOutcome());
 
 			}
 		}
+		
+		System.out.println("--------------");
 
 		System.out.printf("\nAccuracy: %.2f", (testSet.size() - accuracy) / testSet.size() * 100);
 		System.out.println("%");
@@ -214,7 +220,7 @@ public class NearestNeighbour {
 	}
 
 	public static void main(String[] args) {
-		new NearestNeighbour();
+		new NearestNeighbour(args[1], args[0]);
 	}
 
 }

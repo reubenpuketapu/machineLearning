@@ -30,8 +30,9 @@ public class Helper {
 			System.out.println(numCategories + " categories");
 
 			attNames = new ArrayList<String>();
-			for (Scanner s = new Scanner(din.nextLine()); s.hasNext();)
+			for (Scanner s = new Scanner(din.nextLine()); s.hasNext();){
 				attNames.add(s.next());
+			}
 			numAtts = attNames.size();
 			System.out.println(numAtts + " attributes");
 
@@ -53,10 +54,12 @@ public class Helper {
 		return instances;
 	}
 
-	private class Instance {
+	public class Instance {
 
 		private int category;
 		private List<Boolean> vals;
+
+		private int testCategory;
 
 		public Instance(int cat, Scanner s) {
 			category = cat;
@@ -71,6 +74,14 @@ public class Helper {
 
 		public int getCategory() {
 			return category;
+		}
+
+		public int getTestCategory() {
+			return testCategory;
+		}
+
+		public void setTestCategory(int cat) {
+			this.testCategory = cat;
 		}
 
 		public String toString() {
