@@ -28,12 +28,10 @@ public class DecisionTreeLearning {
 		System.out.println("\n");
 		testInstances((NonLeafNode) root, test);
 
-		System.out.printf("\n\nAccuracy: %4.2f", (correct / (correct + incorrect)));
+		System.out.printf("\n\nAccuracy: %4.2f", (correct / (correct + incorrect))*100);
 		System.out.println("%");
-		System.out.printf("Baseline classifier: %4.2f", baseline);
+		System.out.printf("Baseline classifier: %4.2f", baseline*100);
 		System.out.println("%");
-
-
 	}
 
 	private void calculateBaseline() {
@@ -44,7 +42,6 @@ public class DecisionTreeLearning {
 			}
 		}
 		this.baseline = firstClass / helper.allInstances.size();
-
 	}
 
 	private void testInstances(NonLeafNode node, String test) {
@@ -53,11 +50,8 @@ public class DecisionTreeLearning {
 		tester.readDataFile(test);
 
 		for (Instance instance : tester.allInstances) {
-
 			classInstance(instance, (NonLeafNode) root);
-
 		}
-
 	}
 
 	private void classInstance(Instance instance, Node node) {
